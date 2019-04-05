@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ['src']
+        resources.srcDirs = ['res']
+    }
+
+    test {
+        java.srcDirs = ['test']
+        resources.srcDirs = ['test/res']
+    }
+}
+
+mainClassName = 'Main'
