@@ -9,6 +9,8 @@ repositories {
 }
 
 project.ext.v_lwjgl = '3.2.1'
+project.ext.v_joml = '1.9.14'
+
 project.ext.OS = System.getProperty('os.name').toLowerCase((Locale.ENGLISH))
 if (OS.contains('win')) project.ext.OS = 'windows'
 if (OS.contains('nux')) project.ext.OS = 'linux'
@@ -26,6 +28,8 @@ dependencies {
 
     implementation "org.lwjgl:lwjgl-opengl:$v_lwjgl"
     runtimeOnly "org.lwjgl:lwjgl-opengl:$v_lwjgl:natives-$OS"
+
+    implementation "org.joml:joml:$v_joml"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
