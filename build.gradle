@@ -11,8 +11,11 @@ repositories {
 project.ext.v_lwjgl = '3.2.1'
 project.ext.OS = System.getProperty('os.name').toLowerCase((Locale.ENGLISH))
 if (OS.contains('win')) project.ext.OS = 'windows'
-if (OS.contains('mac')) project.ext.OS = 'macos'
 if (OS.contains('nux')) project.ext.OS = 'linux'
+if (OS.contains('mac')) {
+    project.ext.OS = 'macos'
+    applicationDefaultJvmArgs = ['-XstartOnFirstThread']
+}
 
 dependencies {
     implementation "org.lwjgl:lwjgl:$v_lwjgl"
