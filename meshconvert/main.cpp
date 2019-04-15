@@ -122,9 +122,9 @@ int main( int argc, const char * argv[] ) {
     }
     
     for( int i = 0; i < points.size(); i++ ) {
-      //std::cout << points[i].x() << " " << points[i].y() << " " << points[i].z() << std::endl;
+      std::cout << points[i].x() << " " << points[i].y() << " " << points[i].z() << std::endl;
       // for easy GMSH viewing
-      std::cout << "Point (" << i << ") = {" << points[i].x() << ", " << points[i].y() << ", " << points[i].z() << ", 1.0};" << std::endl;
+      //std::cout << "Point (" << i << ") = {" << points[i].x() << ", " << points[i].y() << ", " << points[i].z() << ", 1.0};" << std::endl;
     }
     
     
