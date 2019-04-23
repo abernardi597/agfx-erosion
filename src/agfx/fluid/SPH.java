@@ -10,34 +10,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class SPH {
-    private static final double PI = Math.PI;
     private static final double R = 8.3144598f;
-
-    // Kernels from Particle-based Fluid Simulation for Interactive Applications by Matthias and Mueller, 2003
-    private static double kernel(Vector3dc r, double h) {
-        double d = h*h - r.lengthSquared();
-        return 315 / (64 * PI * h*h*h*h*h*h*h*h*h) * d*d*d;
-    }
-
-    private static Vector3d kernelGradient(Vector3dc r, double h, Vector3d result) {
-        double d = h*h - r.lengthSquared();
-        return r.mul(-945 / (32 * PI * h*h*h*h*h*h*h*h*h) * d*d, result);
-    }
-
-    private static double kernelLaplacian(Vector3dc r, double h) {
-        double d = r.lengthSquared();
-        return -945 / (32 * PI * h*h*h*h*h*h*h*h*h) * (3 * h*h*h*h - 10 * h*h*d + 7*d*d);
-    }
-
-    private static Vector3d kernelPressureGradient(Vector3dc r, double h, Vector3d result) {
-        double r1 = r.length();
-        double d = h - r1;
-        return r.mul(-45 / (PI * h*h*h*h*h*h) * d*d / r1, result);
-    }
-
-    private static double kernelViscosityLaplacian(Vector3dc r, double h) {
-        return 45 / (PI * h*h*h*h*h*h) * (h - r.length());
-    }
 
     public static class Particle {
         public final Fluid fluid;
@@ -169,7 +142,7 @@ public class SPH {
             Vector3d scratch = new Vector3d();
             p.density = 0;
             for (Particle q : p.neighbors)
-                p.density += q.mass * kernel(p.pos.sub(q.pos, scratch), kernelRadius);
+                p.density += q.mass * Kernel.POLY_6.kernel(p.pos.sub(q.pos, scratch), kernelRadius);
             p.pressure = p.fluid.restPressure + 293.15 * (p.density - p.fluid.restDensity) / p.fluid.molarMass;
         });
 
@@ -181,16 +154,16 @@ public class SPH {
             double tension = 0;
             for (Particle q : p.neighbors) {
                 // Pressure
-                p.force.sub(kernelPressureGradient(p.pos.sub(q.pos, scratch), kernelRadius, scratch).mul(q.mass * (p.pressure / (p.density * p.density) + q.pressure / (q.density * q.density))));
+                p.force.sub(Kernel.SPIKY.gradient(p.pos.sub(q.pos, scratch), kernelRadius, scratch).mul(q.mass * (p.pressure / (p.density * p.density) + q.pressure / (q.density * q.density))));
                 // p.force.sub(kernelPressureGradient(p.pos.sub(q.pos, scratch), kernelRadius, scratch).mul(q.mass * (p.pressure + q.pressure) / (2 * q.density)));
 
                 // Viscosity
-                double k = kernelViscosityLaplacian(p.pos.sub(q.pos, scratch), kernelRadius);
+                double k = Kernel.VISCOSITY.laplacian(p.pos.sub(q.pos, scratch), kernelRadius);
                 p.force.add(q.vel.sub(p.vel, scratch).mul((q.mass / q.density) * (p.fluid.viscosity + q.fluid.viscosity) / 2 * k));
 
                 // Surface normal
-                tension += (p.fluid.cohesion + q.fluid.cohesion) / 2 * -kernelLaplacian(p.pos.sub(q.pos, scratch), kernelRadius);
-                p.normal.add(kernelGradient(scratch, kernelRadius, scratch).mul(q.mass / q.density));
+                tension += (p.fluid.cohesion + q.fluid.cohesion) / 2 * -Kernel.POLY_6.laplacian(p.pos.sub(q.pos, scratch), kernelRadius);
+                p.normal.add(Kernel.POLY_6.gradient(scratch, kernelRadius, scratch).mul(q.mass / q.density));
             }
             double n = p.normal.length();
             if (n < Math.pow(kernelRadius, -1/3.0))
