@@ -1,1 +1,3 @@
 rootProject.name = 'agfx.erosion'
+include "fluid"
+include "meshconvert"
